@@ -6,7 +6,7 @@ const chai = require('chai'),
   DataTypes = require(__dirname + '/../../../lib/data-types'),
   sinon = require('sinon');
 
-describe.only(Support.getTestDialectTeaser('Hooks'), () => {
+describe(Support.getTestDialectTeaser('Hooks'), () => {
   beforeEach(function() {
     this.User = this.sequelize.define('User', {
       username: {

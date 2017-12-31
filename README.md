@@ -18,7 +18,7 @@ These are some new features:
 
 - ConextModel class
 - `beforeQuery` and `afterQuery` hooks on global `sequelize` instance
-- only support Node.js >= 6.0.0
+- only support Node.js >= 8.0.0
 
 ## Table of Contents
 - [Installation](#installation)
