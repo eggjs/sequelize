@@ -33,12 +33,15 @@ describe(Support.getTestDialectTeaser('Hooks'), () => {
         expect(afterHook).to.have.been.calledOnce;
         const sql = beforeHook.firstCall.args[0];
         expect(sql).to.contain('INSERT INTO `Users` (`id`,`username`,`mood`,`createdAt`,`updatedAt`) VALUES (DEFAULT,\'Toni\',\'happy\',');
+        const metaBefore = beforeHook.firstCall.args[1];
+        expect(metaBefore.connectDuration).to.be.a('number');
 
         expect(afterHook.firstCall.args[0]).to.equal(sql);
         const meta = afterHook.firstCall.args[1];
         expect(meta.results[0].isNewRecord).to.equal(false);
         expect(meta.error).to.equal(null);
         expect(meta.duration).to.be.a('number');
+        expect(meta.connectDuration).to.be.a('number');
       });
     });
 
@@ -110,6 +113,7 @@ describe(Support.getTestDialectTeaser('Hooks'), () => {
         expect(meta.results).not.to.equal(null);
         expect(meta.error).to.equal(null);
         expect(meta.duration).to.be.a('number');
+        expect(meta.connectDuration).to.be.a('number');
         const options2 = afterHook.firstCall.args[2];
         expect(options2.model).to.equal(undefined);
         expect(options2.ctx).to.equal(ctx);
