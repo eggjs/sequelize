@@ -45,7 +45,8 @@ describe(Support.getTestDialectTeaser('Model'), () => {
       const ContextModel1 = Model.contextify(ctx);
       const ContextModel2 = Model.contextify(ctx);
       const ContextModel3 = Model.contextify(ctx2);
-      expect(ContextModel1 !== ContextModel2).to.equal(true);
+      expect(ContextModel1).to.equal(ContextModel2);
+      expect(ContextModel1).not.to.equal(ContextModel3);
       expect(ContextModel1.ctx === ContextModel2.ctx).to.equal(true);
       expect(ContextModel1.ctx !== ContextModel3.ctx).to.equal(true);
 
