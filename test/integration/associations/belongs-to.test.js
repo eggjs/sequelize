@@ -377,6 +377,74 @@ describe(Support.getTestDialectTeaser('BelongsTo'), () => {
       });
     });
 
+    it('should work on ContextModel', function() {
+      const User = this.sequelize.define('User', { username: DataTypes.STRING }),
+        Task = this.sequelize.define('Task', { title: DataTypes.STRING });
+
+      Task.belongsTo(User);
+
+      User.addHook('beforeCreate', user => {
+        // console.log(user, user.ctx);
+        user.username = `[${user.ctx.value}] ${user.username}`;
+      });
+      Task.addHook('beforeCreate', task => {
+        // console.log(task, task.ctx);
+        task.title = `[${task.ctx.value}] ${task.title}`;
+      });
+
+      // support contextify Model
+      class Context {
+        constructor(val) {
+          this.value = val;
+        }
+      }
+
+      return this.sequelize.sync({force: true}).then(() => {
+        const ctx1 = new Context('ctx1');
+        const ctx2 = new Context('ctx2');
+        const ContextTask1 = Task.contextify(ctx1);
+        const ContextTask2 = Task.contextify(ctx2);
+
+        return Promise.join(
+          ContextTask1.create({
+            title: 'task1'
+          }),
+          ContextTask2.create({
+            title: 'task2'
+          }),
+          ContextTask1.create({
+            title: 'task3'
+          })
+        ).then(tasks => {
+          const task1 = tasks[0];
+          const task2 = tasks[1];
+          const task3 = tasks[2];
+          expect(task1.ctx.value).to.equal('ctx1');
+          expect(task1.title).to.equal('[ctx1] task1');
+          expect(task2.ctx.value).to.equal('ctx2');
+          expect(task2.title).to.equal('[ctx2] task2');
+          expect(task3.ctx.value).to.equal('ctx1');
+          expect(task3.title).to.equal('[ctx1] task3');
+
+          return Promise.join(
+            task1.createUser({ username: 'task1 user' }).then(t => t.getUser()),
+            task2.createUser({ username: 'task2 user' }).then(t => t.getUser()),
+            task3.createUser({ username: 'task3 user' }).then(t => t.getUser())
+          );
+        }).then(users => {
+          const user1 = users[0];
+          const user2 = users[1];
+          const user3 = users[2];
+          expect(user1.ctx.value).to.equal('ctx1');
+          expect(user1.username).to.equal('[ctx1] task1 user');
+          expect(user2.ctx.value).to.equal('ctx2');
+          expect(user2.username).to.equal('[ctx2] task2 user');
+          expect(user3.ctx.value).to.equal('ctx1');
+          expect(user3.username).to.equal('[ctx1] task3 user');
+        });
+      });
+    });
+
     if (current.dialect.supports.transactions) {
       it('supports transactions', function() {
         return Support.prepareTransactionTest(this.sequelize).then(sequelize => {
